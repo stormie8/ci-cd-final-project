@@ -19,9 +19,16 @@ spec:
         #!/usr/bin/env sh
         set -eu
         echo "Removing all files from ${WORKSPACE_SOURCE_PATH} ..."
+        # Delete any existing contents of the directory if it exists.
+        #
+        # We don't just "rm -rf ${WORKSPACE_SOURCE_PATH}" because ${WORKSPACE_SOURCE_PATH} might be "/"
+        # or the root of a mounted volume.
         if [ -d "${WORKSPACE_SOURCE_PATH}" ] ; then
+          # Delete non-hidden files and directories
           rm -rf "${WORKSPACE_SOURCE_PATH:?}"/*
+          # Delete files and directories starting with . but excluding ..
           rm -rf "${WORKSPACE_SOURCE_PATH}"/.[!.]*
+          # Delete files and directories starting with .. plus any other character
           rm -rf "${WORKSPACE_SOURCE_PATH}"/..?*
         fi
 ---
@@ -79,17 +86,14 @@ spec:
         set -e
         export HOME=/tmp/home
         export PATH=$PATH:$HOME/.local/bin
-
         echo "Installing pip and flake8..."
         python -m ensurepip --upgrade
         python -m pip install --upgrade pip
         python -m pip install flake8
-
         if [ -n "$(params.requirements_file)" ] && [ -e "$(params.requirements_file)" ]; then
           echo "Installing requirements from $(params.requirements_file)..."
           python -m pip install -r $(params.requirements_file)
         fi
-
         echo "Running flake8..."
         flake8 $(params.args) $(params.path)
   workspaces:
