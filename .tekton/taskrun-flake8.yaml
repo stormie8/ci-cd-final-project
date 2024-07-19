@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: flake8-taskrun
+  namespace: sn-labs-thejohnli888
+spec:
+  taskRef:
+    name: flake8
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: your-pvc-name  # Replace with your PVC name
+  params:
+    - name: image
+      value: 'python:3.9-slim'
+    - name: path
+      value: .
+    - name: requirements_file
+      value: requirements.txt
+    - name: args
+      value:
+        - '--max-line-length=88'
